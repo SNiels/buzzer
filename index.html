@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+
+<head>
+    <style>
+        html{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+        }
+        *{
+            margin: 0;
+            padding: 0;
+            border: 0;
+            box-sizing: border-box;
+        }
+        button{
+            -moz-user-select: none; 
+            -webkit-user-select: none; 
+            -ms-user-select:none; 
+            user-select:none;
+            -o-user-select:none;
+            height: 100vh;
+            width: 100vw;
+            background: #111;
+            color: #f55;
+            border: 2px solid #f55;
+            font-size: 54px; /* Some tweener fallback that doesn't look awful */ 
+            font-size: 8vw; 
+        }
+        button.buzzing{
+            animation: shake 1s infinite;
+        }
+        @keyframes shake {
+            0%, 100% {transform: translateX(0) rotate(0deg) translateY(0);}
+            15%, 35%, 55%, 75%, 95% {transform: translateX(-1px) rotate(-2deg) ;}
+            25%, 45%, 65%, 85% {transform: translateX(1px) rotate(2deg); }
+            10%, 30%, 50%, 70%, 90% {transform: translateY(1px);}    
+            20%, 40%, 60%, 80% {transform: translateY(-1px); }  
+        }
+    </style>
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#f55">
+</head>
+
+<body>
+    <button id="buzz">Tap to buzz</button>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        (function () {
+            var socket = io(),
+                btn = document.getElementById("buzz"),
+                makeVibrate = false;
+            btn.addEventListener("mousedown", startBuzz);
+            btn.addEventListener("touchstart", startBuzz);
+            btn.addEventListener("mouseup", stopBuzz);
+            btn.addEventListener("touchend", stopBuzz);
+            setInterval(vibrate, 50);
+
+            socket.on('startbuzz', function () {
+                console.log('startbuzz');
+                makeVibrate = true;
+                btn.className = "buzzing";
+            });
+            socket.on('stopbuzz', function () {
+                console.log('stopbuzz');
+                makeVibrate = false;
+                btn.className = "";
+            });
+
+            function startBuzz() {
+                socket.emit("startbuzz");
+            }
+
+            function stopBuzz() {
+                socket.emit("stopbuzz");
+            }
+
+            function vibrate() {
+                if (makeVibrate)
+                    navigator.vibrate(500);
+            }
+        })();
+    </script>
+</body>
+
+</html>
